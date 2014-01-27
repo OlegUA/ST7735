@@ -72,9 +72,6 @@
 #define ST7735_GMCTRP1 0xE0
 #define ST7735_GMCTRN1 0xE1
 
-// Color definitions
-#define F666			
-
 // 5-6-5 bits colors samples 
 #define	ST7735_BLACK   0x0000
 #define	ST7735_BLUE    0x001F
@@ -110,6 +107,8 @@
 extern void lcd7735_initB(void);
 // Initialization for ST7735R screens (green or red tabs)
 extern void lcd7735_initR(uint8_t options);
+extern uint8_t lcd7735_getWidth(void);
+extern uint8_t lcd7735_getHeight(void);
 
 extern void lcd7735_invertDisplay(const uint8_t mode);
 extern void lcd7735_setRotation(uint8_t m);

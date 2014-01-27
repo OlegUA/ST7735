@@ -197,13 +197,17 @@ static void commandList(const uint8_t *addr) {
 static void commonInit(const uint8_t *cmdList) {
   // toggle RST low to reset; CS low so it'll listen to us
 	LCD_CS0;
+#ifdef LCD_SOFT_RESET
+	lcd7735_sendCmd(ST7735_SWRESET);
+	delay_ms(500);
+#else
 	LCD_RST1;
 	delay_ms(500);
 	LCD_RST0;
     delay_ms(500);
 	LCD_RST1;
 	delay_ms(500);
-    
+#endif    
 	if(cmdList) commandList(cmdList);
 }
 
@@ -215,6 +219,7 @@ void lcd7735_initB(void) {
 
 // Initialization for ST7735R screens (green or red tabs)
 void lcd7735_initR(uint8_t options) {
+  delay_ms(50);
   commonInit(Rcmd1);
   if(options == INITR_GREENTAB) {
     commandList(Rcmd2green);
@@ -257,8 +262,6 @@ void lcd7735_setAddrWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
 void lcd7735_pushColor(uint16_t color) {
   LCD_DC1;  
 	putpix(color);
-  //lcd7735_senddata(color >> 8);
-  //lcd7735_senddata(color & 0xFF);
 }
 
 void lcd7735_drawPixel(int16_t x, int16_t y, uint16_t color) {
@@ -278,8 +281,6 @@ void lcd7735_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
 	LCD_DC1;
 	while (h--) {
 		putpix(color);
-		//lcd7735_senddata(color >> 8);
-		//lcd7735_senddata(color & 0xFF);
 	}
 }
 
@@ -293,14 +294,12 @@ void lcd7735_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
 	LCD_DC1;
 	while (w--) {
 		putpix(color);
-		//lcd7735_senddata(color >> 8);
-		//lcd7735_senddata(color & 0xFF);
 	}
 }
 
 void lcd7735_drawFastLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint16_t color) {
-signed char   dx, dy, sx, sy;
-unsigned char  x,  y, mdx, mdy, l;
+  signed char   dx, dy, sx, sy;
+  unsigned char  x,  y, mdx, mdy, l;
 
   if (x1==x2) { // быстрая отрисовка вертикальной линии
 	  lcd7735_fillRect(x1,y1, x1,y2, color);
@@ -362,8 +361,6 @@ void lcd7735_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color
   for(y=h; y>0; y--) {
     for(x=w; x>0; x--) {
 		putpix(color);
-		//lcd7735_senddata(color >> 8);
-		//lcd7735_senddata(color & 0xFF);
     }
   }
 }
@@ -551,8 +548,8 @@ void lcd7735_setFont(uint8_t* font) {
 	cfont.numchars=font[3];
 }
 
-static uint8_t _transparent = 1;
-static uint16_t _fg = ST7735_CYAN;
+static uint8_t _transparent = 0;
+static uint16_t _fg = ST7735_GREEN;
 static uint16_t _bg = ST7735_BLACK;
 
 void lcd7735_setTransparent(uint8_t s) {
@@ -666,7 +663,96 @@ void lcd7735_print(char *st, int x, int y, int deg) {
 			rotateChar(*st++, x, y, i, deg);
 }
 
+/*
+void lcd7735_printNumI(long num, int x, int y, int length, char filler)
+{
+	char buf[25];
+	char st[27];
+	uint8_t neg=0;
+	int c=0, f=0,i;
+  
+	if (num==0) {
+		if (length!=0) {
+			for (c=0; c<(length-1); c++)
+				st[c]=filler;
+			st[c]=48;
+			st[c+1]=0;
+		} else {
+			st[0]=48;
+			st[1]=0;
+		}
+	} else {
+		if (num<0) {
+			neg=1;
+			num=-num;
+		}
+	  
+		while (num>0) {
+			buf[c]=48+(num % 10);
+			c++;
+			num=(num-(num % 10))/10;
+		}
+		buf[c]=0;
+	  
+		if (neg == 1) {
+			st[0]=45;
+		}
+	  
+		if (length>(c+neg)) {
+			for (i=0; i<(length-c-neg); i++) {
+				st[i+neg]=filler;
+				f++;
+			}
+		}
 
+		for (i=0; i<c; i++) {
+			st[i+neg+f]=buf[c-i-1];
+		}
+		st[c+neg+f]=0;
+	}
+
+	lcd7735_print(st,x,y,0);
+}
+
+void lcd7735_printNumF(double num, uint8_t dec, int x, int y, char divider, int length, char filler)
+{
+	char st[27], fmt[20];
+	uint8_t neg=0;
+	int i;
+
+	if (dec<1)
+		dec=1;
+	else if (dec>5)
+		dec=5;
+
+	if (num<0)
+		neg = 1;
+
+	sprintf(fmt,"%%%d.%df",length,(int)dec);
+	scanf(st, fmt, num);
+
+	if (divider != '.') {
+		for (i=0; i<sizeof(st); i++)
+			if (st[i]=='.')
+				st[i]=divider;
+	}
+
+	if (filler != ' ') {
+		if (neg) {
+			st[0]='-';
+			for (i=1; i<sizeof(st); i++)
+				if ((st[i]==' ') || (st[i]=='-'))
+					st[i]=filler;
+		} else {
+			for (i=0; i<sizeof(st); i++)
+				if (st[i]==' ')
+					st[i]=filler;
+		}
+	}
+	lcd7735_print(st,x,y,0);
+}
+*/
+/**  service functions ***/
 void lcd7735_invertDisplay(const uint8_t mode) {
 	if( mode == INVERT_ON ) lcd7735_sendCmd(ST7735_INVON);
 	else if( mode == INVERT_OFF ) lcd7735_sendCmd(ST7735_INVOFF);
@@ -676,6 +762,13 @@ void lcd7735_lcdOff() {
 	lcd7735_sendCmd(ST7735_DISPOFF);
 }
 
-void St7735_lcdOn() {
+void lcd7735_lcdOn() {
 	lcd7735_sendCmd(ST7735_DISPON);
+}
+
+uint8_t lcd7735_getWidth() {
+	return(_width);
+}
+uint8_t lcd7735_getHeight() {
+	return(_height);
 }
