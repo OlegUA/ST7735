@@ -1,17 +1,13 @@
 /***************************************************
+  Code below has been ported from Arduino Adafruit library.
+  Copyrigths below.  
+
   This is a library for the Adafruit 1.8" SPI display.
   This library works with the Adafruit 1.8" TFT Breakout w/SD card
   ----> http://www.adafruit.com/products/358
   as well as Adafruit raw 1.8" TFT display
   ----> http://www.adafruit.com/products/618
  
-  Check out the links above for our tutorials and wiring diagrams
-  These displays use SPI to communicate, 4 or 5 pins are required to
-  interface (RST is optional)
-  Adafruit invests time and resources providing this open source code,
-  please support Adafruit and open-source hardware by purchasing
-  products from Adafruit!
-
   Written by Limor Fried/Ladyada for Adafruit Industries.
   MIT license, all text above must be included in any redistribution
  ****************************************************/
@@ -111,31 +107,31 @@
 #define bitmapdatatype uint16_t *
 
 // Initialization for ST7735B screens
-extern void ST7735_initB(void);
+extern void lcd7735_initB(void);
 // Initialization for ST7735R screens (green or red tabs)
-extern void ST7735_initR(uint8_t options);
+extern void lcd7735_initR(uint8_t options);
 
-extern void ST7735_invertDisplay(const uint8_t mode);
-extern void ST7735_setRotation(uint8_t m);
-extern void ST7735_fillScreen(uint16_t color);
+extern void lcd7735_invertDisplay(const uint8_t mode);
+extern void lcd7735_setRotation(uint8_t m);
+extern void lcd7735_fillScreen(uint16_t color);
 // Pass 8-bit (each) R,G,B, get back 16-bit packed color
-extern uint16_t ST7735_Color565(uint8_t r, uint8_t g, uint8_t b);
-extern void ST7735_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-extern void ST7735_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
-extern void ST7735_drawPixel(int16_t x, int16_t y, uint16_t color);
-extern void ST7735_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
-extern void ST7735_setAddrWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
-extern void ST7735_pushColor(uint16_t color); // CAUTION!! can't be used separately
-extern void ST7735_drawFastLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint16_t color);
-extern void ST7735_drawRect(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2, uint16_t color);
-extern void ST7735_drawCircle(int16_t x, int16_t y, int radius, uint16_t color);
-extern void ST7735_fillCircle(int16_t x, int16_t y, int radius, uint16_t color);
-extern void ST7735_drawBitmap(int x, int y, int sx, int sy, bitmapdatatype data, int scale);
-extern void ST7735_drawBitmapRotate(int x, int y, int sx, int sy, bitmapdatatype data, int deg, int rox, int roy);
-extern void ST7735_setFont(uint8_t* font);
-extern void ST7735_setTransparent(uint8_t s);
-extern void ST7735_setForeground(uint16_t s);
-extern void ST7735_setBackground(uint16_t s);
-extern void ST7735_print(char *st, int x, int y, int deg);
+extern uint16_t lcd7735_Color565(uint8_t r, uint8_t g, uint8_t b);
+extern void lcd7735_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+extern void lcd7735_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
+extern void lcd7735_drawPixel(int16_t x, int16_t y, uint16_t color);
+extern void lcd7735_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
+extern void lcd7735_setAddrWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
+extern void lcd7735_pushColor(uint16_t color); // CAUTION!! can't be used separately
+extern void lcd7735_drawFastLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint16_t color);
+extern void lcd7735_drawRect(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2, uint16_t color);
+extern void lcd7735_drawCircle(int16_t x, int16_t y, int radius, uint16_t color);
+extern void lcd7735_fillCircle(int16_t x, int16_t y, int radius, uint16_t color);
+extern void lcd7735_drawBitmap(int x, int y, int sx, int sy, bitmapdatatype data, int scale);
+extern void lcd7735_drawBitmapRotate(int x, int y, int sx, int sy, bitmapdatatype data, int deg, int rox, int roy);
+extern void lcd7735_setFont(uint8_t* font);
+extern void lcd7735_setTransparent(uint8_t s);
+extern void lcd7735_setForeground(uint16_t s);
+extern void lcd7735_setBackground(uint16_t s);
+extern void lcd7735_print(char *st, int x, int y, int deg);
 
 #endif

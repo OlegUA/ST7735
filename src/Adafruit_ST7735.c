@@ -1,17 +1,13 @@
 /***************************************************
+  Code below has been ported from Arduino Adafruit library.
+  Copyrigths below.  
+
   This is a library for the Adafruit 1.8" SPI display.
   This library works with the Adafruit 1.8" TFT Breakout w/SD card
   ----> http://www.adafruit.com/products/358
   as well as Adafruit raw 1.8" TFT display
   ----> http://www.adafruit.com/products/618
  
-  Check out the links above for our tutorials and wiring diagrams
-  These displays use SPI to communicate, 4 or 5 pins are required to
-  interface (RST is optional)
-  Adafruit invests time and resources providing this open source code,
-  please support Adafruit and open-source hardware by purchasing
-  products from Adafruit!
-
   Written by Limor Fried/Ladyada for Adafruit Industries.
   MIT license, all text above must be included in any redistribution
  ****************************************************/
@@ -212,13 +208,13 @@ static void commonInit(const uint8_t *cmdList) {
 }
 
 // Initialization for ST7735B screens
-void ST7735_initB(void) {
+void lcd7735_initB(void) {
   commonInit(Bcmd);
 }
 
 
 // Initialization for ST7735R screens (green or red tabs)
-void ST7735_initR(uint8_t options) {
+void lcd7735_initR(uint8_t options) {
   commonInit(Rcmd1);
   if(options == INITR_GREENTAB) {
     commandList(Rcmd2green);
@@ -240,7 +236,7 @@ void ST7735_initR(uint8_t options) {
 }
 
 
-void ST7735_setAddrWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
+void lcd7735_setAddrWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
 
   lcd7735_sendCmd(ST7735_CASET); // Column addr set
   lcd7735_sendData(0x00);
@@ -258,26 +254,26 @@ void ST7735_setAddrWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
 }
 
 
-void ST7735_pushColor(uint16_t color) {
+void lcd7735_pushColor(uint16_t color) {
   LCD_DC1;  
 	putpix(color);
   //lcd7735_senddata(color >> 8);
   //lcd7735_senddata(color & 0xFF);
 }
 
-void ST7735_drawPixel(int16_t x, int16_t y, uint16_t color) {
+void lcd7735_drawPixel(int16_t x, int16_t y, uint16_t color) {
 
   if((x < 0) ||(x >= _width) || (y < 0) || (y >= _height)) return;
 
-  ST7735_setAddrWindow(x,y,x+1,y+1);
-  ST7735_pushColor(color);
+  lcd7735_setAddrWindow(x,y,x+1,y+1);
+  lcd7735_pushColor(color);
 }
 
-void ST7735_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
+void lcd7735_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
   // Rudimentary clipping
   if((x >= _width) || (y >= _height)) return;
   if((y+h-1) >= _height) h = _height-y;
-  ST7735_setAddrWindow(x, y, x, y+h-1);
+  lcd7735_setAddrWindow(x, y, x, y+h-1);
 
 	LCD_DC1;
 	while (h--) {
@@ -288,11 +284,11 @@ void ST7735_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
 }
 
 
-void ST7735_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
+void lcd7735_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
 	// Rudimentary clipping
 	if((x >= _width) || (y >= _height)) return;
 	if((x+w-1) >= _width)  w = _width-x;
-	ST7735_setAddrWindow(x, y, x+w-1, y);
+	lcd7735_setAddrWindow(x, y, x+w-1, y);
 
 	LCD_DC1;
 	while (w--) {
@@ -302,17 +298,17 @@ void ST7735_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
 	}
 }
 
-void ST7735_drawFastLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint16_t color) {
+void lcd7735_drawFastLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint16_t color) {
 signed char   dx, dy, sx, sy;
 unsigned char  x,  y, mdx, mdy, l;
 
   if (x1==x2) { // быстра€ отрисовка вертикальной линии
-	  ST7735_fillRect(x1,y1, x1,y2, color);
+	  lcd7735_fillRect(x1,y1, x1,y2, color);
 	  return;
   }
 
   if (y1==y2) { // быстра€ отрисовка горизонтальной линии
-	  ST7735_fillRect(x1,y1, x2,y1, color);
+	  lcd7735_fillRect(x1,y1, x2,y1, color);
 	  return;
   }
 
@@ -328,7 +324,7 @@ unsigned char  x,  y, mdx, mdy, l;
      while (l>0) {
          if (dy>0) { y=y1+mdy*(x-x1)/mdx; }
             else { y=y1-mdy*(x-x1)/mdx; }
-         ST7735_drawPixel(x,y,color);
+         lcd7735_drawPixel(x,y,color);
          x=x+sx;
          l--;
      }
@@ -337,30 +333,30 @@ unsigned char  x,  y, mdx, mdy, l;
      while (l>0) {
         if (dy>0) { x=x1+((mdx*(y-y1))/mdy); }
           else { x=x1+((mdx*(y1-y))/mdy); }
-        ST7735_drawPixel(x,y,color);
+        lcd7735_drawPixel(x,y,color);
         y=y+sy;
         l--;
      }
   }
-  ST7735_drawPixel(x2, y2, color);
+  lcd7735_drawPixel(x2, y2, color);
 }
 
 // рисование пр€моугольника (не заполненного)
-void ST7735_drawRect(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2, uint16_t color) {
-	ST7735_drawFastHLine(x1,y1,x2-x1, color);
-	ST7735_drawFastVLine(x2,y1,y2-y1, color);
-	ST7735_drawFastHLine(x1,y2,x2-x1, color);
-	ST7735_drawFastVLine(x1,y1,y2-y1, color);
+void lcd7735_drawRect(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2, uint16_t color) {
+	lcd7735_drawFastHLine(x1,y1,x2-x1, color);
+	lcd7735_drawFastVLine(x2,y1,y2-y1, color);
+	lcd7735_drawFastHLine(x1,y2,x2-x1, color);
+	lcd7735_drawFastVLine(x1,y1,y2-y1, color);
 }
 
 // fill a rectangle
-void ST7735_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {	
+void lcd7735_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {	
   // rudimentary clipping (drawChar w/big text requires this)
   if((x >= _width) || (y >= _height)) return;
   if((x + w - 1) >= _width)  w = _width  - x;
   if((y + h - 1) >= _height) h = _height - y;
 
-  ST7735_setAddrWindow(x, y, x+w-1, y+h-1);
+  lcd7735_setAddrWindow(x, y, x+w-1, y+h-1);
 
   LCD_DC1;
   for(y=h; y>0; y--) {
@@ -372,32 +368,31 @@ void ST7735_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
   }
 }
 
-void ST7735_fillScreen(uint16_t color) {
-  ST7735_fillRect(0, 0,  _width, _height, color);
+void lcd7735_fillScreen(uint16_t color) {
+  lcd7735_fillRect(0, 0,  _width, _height, color);
 }
 
 // Pass 8-bit (each) R,G,B, get back 16-bit packed color
-uint16_t ST7735_Color565(uint8_t r, uint8_t g, uint8_t b) {
+uint16_t lcd7735_Color565(uint8_t r, uint8_t g, uint8_t b) {
   return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
 }
 
-void ST7735_drawCircle(int16_t x, int16_t y, int radius, uint16_t color) {
+void lcd7735_drawCircle(int16_t x, int16_t y, int radius, uint16_t color) {
 	int f = 1 - radius;
 	int ddF_x = 1;
 	int ddF_y = -2 * radius;
 	int x1 = 0;
 	int y1 = radius;
  
-	ST7735_setAddrWindow(x, y + radius, x, y + radius);
-	ST7735_pushColor(color);
-	ST7735_setAddrWindow(x, y - radius, x, y - radius);
-	ST7735_pushColor(color);
-	ST7735_setAddrWindow(x + radius, y, x + radius, y);
-	ST7735_pushColor(color);
-	ST7735_setAddrWindow(x - radius, y, x - radius, y);
-	ST7735_pushColor(color);
-	while(x1 < y1)
-	{
+	lcd7735_setAddrWindow(x, y + radius, x, y + radius);
+	lcd7735_pushColor(color);
+	lcd7735_setAddrWindow(x, y - radius, x, y - radius);
+	lcd7735_pushColor(color);
+	lcd7735_setAddrWindow(x + radius, y, x + radius, y);
+	lcd7735_pushColor(color);
+	lcd7735_setAddrWindow(x - radius, y, x - radius, y);
+	lcd7735_pushColor(color);
+	while(x1 < y1) {
 		if(f >= 0) 
 		{
 			y1--;
@@ -407,100 +402,37 @@ void ST7735_drawCircle(int16_t x, int16_t y, int radius, uint16_t color) {
 		x1++;
 		ddF_x += 2;
 		f += ddF_x;    
-		ST7735_setAddrWindow(x + x1, y + y1, x + x1, y + y1);
-		ST7735_pushColor(color);
-		ST7735_setAddrWindow(x - x1, y + y1, x - x1, y + y1);
-		ST7735_pushColor(color);
-		ST7735_setAddrWindow(x + x1, y - y1, x + x1, y - y1);
-		ST7735_pushColor(color);
-		ST7735_setAddrWindow(x - x1, y - y1, x - x1, y - y1);
-		ST7735_pushColor(color);
-		ST7735_setAddrWindow(x + y1, y + x1, x + y1, y + x1);
-		ST7735_pushColor(color);
-		ST7735_setAddrWindow(x - y1, y + x1, x - y1, y + x1);
-		ST7735_pushColor(color);
-		ST7735_setAddrWindow(x + y1, y - x1, x + y1, y - x1);
-		ST7735_pushColor(color);
-		ST7735_setAddrWindow(x - y1, y - x1, x - y1, y - x1);
-		ST7735_pushColor(color);
+		lcd7735_setAddrWindow(x + x1, y + y1, x + x1, y + y1);
+		lcd7735_pushColor(color);
+		lcd7735_setAddrWindow(x - x1, y + y1, x - x1, y + y1);
+		lcd7735_pushColor(color);
+		lcd7735_setAddrWindow(x + x1, y - y1, x + x1, y - y1);
+		lcd7735_pushColor(color);
+		lcd7735_setAddrWindow(x - x1, y - y1, x - x1, y - y1);
+		lcd7735_pushColor(color);
+		lcd7735_setAddrWindow(x + y1, y + x1, x + y1, y + x1);
+		lcd7735_pushColor(color);
+		lcd7735_setAddrWindow(x - y1, y + x1, x - y1, y + x1);
+		lcd7735_pushColor(color);
+		lcd7735_setAddrWindow(x + y1, y - x1, x + y1, y - x1);
+		lcd7735_pushColor(color);
+		lcd7735_setAddrWindow(x - y1, y - x1, x - y1, y - x1);
+		lcd7735_pushColor(color);
 	}
 }
 
-void ST7735_fillCircle(int16_t x, int16_t y, int radius, uint16_t color) {
+void lcd7735_fillCircle(int16_t x, int16_t y, int radius, uint16_t color) {
 	int x1,y1;
 	for(y1=-radius; y1<=0; y1++) 
 		for(x1=-radius; x1<=0; x1++)
 			if(x1*x1+y1*y1 <= radius*radius) {
-				ST7735_drawFastHLine(x+x1, y+y1, 2*(-x1), color);
-				ST7735_drawFastHLine(x+x1, y-y1, 2*(-x1), color);
+				lcd7735_drawFastHLine(x+x1, y+y1, 2*(-x1), color);
+				lcd7735_drawFastHLine(x+x1, y-y1, 2*(-x1), color);
 				break;
 			}
 }
 
-
-void ST7735_drawBitmap(int x, int y, int sx, int sy, bitmapdatatype data, int scale) {
-	int tx, ty, tc, tsx, tsy;
-
-	if (scale==1) {
-		if (orientation == PORTRAIT_NORMAL || orientation == PORTRAIT_FLIP)
-		{
-			ST7735_setAddrWindow(x, y, x+sx-1, y+sy-1);
-			LCD_DC1;
-			for (tc=0; tc<(sx*sy); tc++)
-				putpix(data[tc]);
-		} else {
-			for (ty=0; ty<sy; ty++) {
-				ST7735_setAddrWindow(x, y+ty, x+sx-1, y+ty);
-				LCD_DC1;
-				for (tx=sx-1; tx>=0; tx--)
-					putpix(data[(ty*sx)+tx]);
-			}
-		}
-	} else {
-		if (orientation == PORTRAIT_NORMAL || orientation == PORTRAIT_FLIP) {
-			for (ty=0; ty<sy; ty++) {
-				ST7735_setAddrWindow(x, y+(ty*scale), x+((sx*scale)-1), y+(ty*scale)+scale);
-				for (tsy=0; tsy<scale; tsy++)
-					for (tx=0; tx<sx; tx++) {
-						for (tsx=0; tsx<scale; tsx++)
-							ST7735_pushColor(data[(ty*sx)+tx]);
-					}
-			}
-		} else {
-			for (ty=0; ty<sy; ty++) {
-				for (tsy=0; tsy<scale; tsy++) {
-					ST7735_setAddrWindow(x, y+(ty*scale)+tsy, x+((sx*scale)-1), y+(ty*scale)+tsy);
-					for (tx=sx-1; tx>=0; tx--) {
-						for (tsx=0; tsx<scale; tsx++)
-							ST7735_pushColor(data[(ty*sx)+tx]);
-					}
-				}
-			}
-		}
-	}
-}
-
-void ST7735_drawBitmapRotate(int x, int y, int sx, int sy, bitmapdatatype data, int deg, int rox, int roy) {
-	int tx, ty, newx, newy;
-	double radian;
-	radian=deg*0.0175;  
-
-	if (deg==0)
-		ST7735_drawBitmap(x, y, sx, sy, data, 1);
-	else
-	{
-		for (ty=0; ty<sy; ty++)
-			for (tx=0; tx<sx; tx++) {
-				newx=x+rox+(((tx-rox)*cos(radian))-((ty-roy)*sin(radian)));
-				newy=y+roy+(((ty-roy)*cos(radian))+((tx-rox)*sin(radian)));
-
-				ST7735_setAddrWindow(newx, newy, newx, newy);
-				ST7735_pushColor(data[(ty*sx)+tx]);
-			}
-	}
-}
-
-void ST7735_setRotation(uint8_t m) {
+void lcd7735_setRotation(uint8_t m) {
   uint8_t rotation = m % 4; // can't be higher than 3
 
   lcd7735_sendCmd(ST7735_MADCTL);
@@ -531,6 +463,78 @@ void ST7735_setRotation(uint8_t m) {
   orientation = m;
 }
 
+/*
+  This part of code dorectly ported from Arduino UTFT library. Copyrights below.
+
+  UTFT.cpp - Arduino/chipKit library support for Color TFT LCD Boards
+  Copyright (C)2010-2013 Henning Karlsen. All right reserved
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the CC BY-NC-SA 3.0 license.
+  Please see the included documents for further information.
+*/
+void lcd7735_drawBitmap(int x, int y, int sx, int sy, bitmapdatatype data, int scale) {
+	int tx, ty, tc, tsx, tsy;
+
+	if (scale==1) {
+		if (orientation == PORTRAIT_NORMAL || orientation == PORTRAIT_FLIP)
+		{
+			lcd7735_setAddrWindow(x, y, x+sx-1, y+sy-1);
+			LCD_DC1;
+			for (tc=0; tc<(sx*sy); tc++)
+				putpix(data[tc]);
+		} else {
+			for (ty=0; ty<sy; ty++) {
+				lcd7735_setAddrWindow(x, y+ty, x+sx-1, y+ty);
+				LCD_DC1;
+				for (tx=sx-1; tx>=0; tx--)
+					putpix(data[(ty*sx)+tx]);
+			}
+		}
+	} else {
+		if (orientation == PORTRAIT_NORMAL || orientation == PORTRAIT_FLIP) {
+			for (ty=0; ty<sy; ty++) {
+				lcd7735_setAddrWindow(x, y+(ty*scale), x+((sx*scale)-1), y+(ty*scale)+scale);
+				for (tsy=0; tsy<scale; tsy++)
+					for (tx=0; tx<sx; tx++) {
+						for (tsx=0; tsx<scale; tsx++)
+							lcd7735_pushColor(data[(ty*sx)+tx]);
+					}
+			}
+		} else {
+			for (ty=0; ty<sy; ty++) {
+				for (tsy=0; tsy<scale; tsy++) {
+					lcd7735_setAddrWindow(x, y+(ty*scale)+tsy, x+((sx*scale)-1), y+(ty*scale)+tsy);
+					for (tx=sx-1; tx>=0; tx--) {
+						for (tsx=0; tsx<scale; tsx++)
+							lcd7735_pushColor(data[(ty*sx)+tx]);
+					}
+				}
+			}
+		}
+	}
+}
+
+void lcd7735_drawBitmapRotate(int x, int y, int sx, int sy, bitmapdatatype data, int deg, int rox, int roy) {
+	int tx, ty, newx, newy;
+	double radian;
+	radian=deg*0.0175;  
+
+	if (deg==0)
+		lcd7735_drawBitmap(x, y, sx, sy, data, 1);
+	else
+	{
+		for (ty=0; ty<sy; ty++)
+			for (tx=0; tx<sx; tx++) {
+				newx=x+rox+(((tx-rox)*cos(radian))-((ty-roy)*sin(radian)));
+				newy=y+roy+(((ty-roy)*cos(radian))+((tx-rox)*sin(radian)));
+
+				lcd7735_setAddrWindow(newx, newy, newx, newy);
+				lcd7735_pushColor(data[(ty*sx)+tx]);
+			}
+	}
+}
+
 static struct _font {
 	uint8_t 	*font;
 	uint8_t 	x_size;
@@ -539,7 +543,7 @@ static struct _font {
 	uint16_t	numchars;
 } cfont;
 
-void ST7735_setFont(uint8_t* font) {
+void lcd7735_setFont(uint8_t* font) {
 	cfont.font=font;
 	cfont.x_size=font[0];
 	cfont.y_size=font[1];
@@ -551,14 +555,14 @@ static uint8_t _transparent = 1;
 static uint16_t _fg = ST7735_CYAN;
 static uint16_t _bg = ST7735_BLACK;
 
-void ST7735_setTransparent(uint8_t s) {
+void lcd7735_setTransparent(uint8_t s) {
 	_transparent = s;
 }
 
-void ST7735_setForeground(uint16_t s) {
+void lcd7735_setForeground(uint16_t s) {
 	_fg = s;
 }
-void ST7735_setBackground(uint16_t s) {
+void lcd7735_setBackground(uint16_t s) {
 	_bg = s;
 }
 
@@ -573,7 +577,7 @@ void printChar(uint8_t c, int x, int y) {
 	else
 		fz = cfont.x_size/8;
 	if (!_transparent) {
-			ST7735_setAddrWindow(x,y,x+cfont.x_size-1,y+cfont.y_size-1);
+			lcd7735_setAddrWindow(x,y,x+cfont.x_size-1,y+cfont.y_size-1);
 	  
 			temp=((c-cfont.offset)*((fz)*cfont.y_size))+4;
 			for(j=0;j<((fz)*cfont.y_size);j++) {
@@ -581,11 +585,11 @@ void printChar(uint8_t c, int x, int y) {
 				for(i=0;i<8;i++) {   
 					if((ch&(1<<(7-i)))!=0)   
 					{
-						ST7735_pushColor(_fg);
+						lcd7735_pushColor(_fg);
 					} 
 					else
 					{
-						ST7735_pushColor(_bg);
+						lcd7735_pushColor(_bg);
 					}   
 				}
 				temp++;
@@ -599,11 +603,11 @@ void printChar(uint8_t c, int x, int y) {
 				ch = cfont.font[temp+zz]; 
 				for(i=0;i<8;i++)
 				{   
-					ST7735_setAddrWindow(x+i+(zz*8),y+j,x+i+(zz*8)+1,y+j+1);
+					lcd7735_setAddrWindow(x+i+(zz*8),y+j,x+i+(zz*8)+1,y+j+1);
 				
 					if((ch&(1<<(7-i)))!=0)   
 					{
-						ST7735_pushColor(_fg);
+						lcd7735_pushColor(_fg);
 					} 
 				}
 			}
@@ -631,13 +635,13 @@ void rotateChar(uint8_t c, int x, int y, int pos, int deg) {
 				newx=x+(((i+(zz*8)+(pos*cfont.x_size))*cos(radian))-((j)*sin(radian)));
 				newy=y+(((j)*cos(radian))+((i+(zz*8)+(pos*cfont.x_size))*sin(radian)));
 
-				ST7735_setAddrWindow(newx,newy,newx+1,newy+1);
+				lcd7735_setAddrWindow(newx,newy,newx+1,newy+1);
 				
 				if((ch&(1<<(7-i)))!=0) {
-					ST7735_pushColor(_fg);
+					lcd7735_pushColor(_fg);
 				} else  {
 					if (!_transparent)
-						ST7735_pushColor(_bg);
+						lcd7735_pushColor(_bg);
 				}   
 			}
 		}
@@ -645,7 +649,7 @@ void rotateChar(uint8_t c, int x, int y, int pos, int deg) {
 	}
 }
 
-void ST7735_print(char *st, int x, int y, int deg) {
+void lcd7735_print(char *st, int x, int y, int deg) {
 	int stl, i;
 
 	stl = strlen(st);
@@ -663,128 +667,15 @@ void ST7735_print(char *st, int x, int y, int deg) {
 }
 
 
-void ST7735_invertDisplay(const uint8_t mode) {
+void lcd7735_invertDisplay(const uint8_t mode) {
 	if( mode == INVERT_ON ) lcd7735_sendCmd(ST7735_INVON);
 	else if( mode == INVERT_OFF ) lcd7735_sendCmd(ST7735_INVOFF);
 }
 
-void ST7735_lcdOff() {
+void lcd7735_lcdOff() {
 	lcd7735_sendCmd(ST7735_DISPOFF);
 }
 
 void St7735_lcdOn() {
 	lcd7735_sendCmd(ST7735_DISPON);
 }
-
-/*
-// ---------------------------------------------------------------------------------------------------------------------------------
-// процедуры управлени€ и вывода
-//
-void lcd7735_init(void); // инициализаци€ диспле€
-		// заполнение пр€моугольной области экрана
-void lcd7735_fillrect(unsigned char startX, unsigned char startY, unsigned char stopX, unsigned char stopY, unsigned int color);
-		// вывод пиксела
-void lcd7735_putpix(unsigned char x, unsigned char y, unsigned int Color);
-		// вывод линии
-void lcd7735_line(unsigned char x1, unsigned char y1, unsigned char x2, unsigned char y2, unsigned int color);
-		// рисование пр€моугольника (не заполненного)
-void lcd7735_rect(char x1,char y1,char x2,char y2, unsigned int color);
-		// вывод символа в цвете по координатам
-void lcd7735_putchar(unsigned char x, unsigned char y, unsigned char chr, unsigned int charColor, unsigned int bkgColor);
-		// вывод строки в цвете по координатам
-void lcd7735_putstr(unsigned char x, unsigned char y, const unsigned char str[], unsigned int charColor, unsigned int bkgColor);
-		// печать дес€тичного числа
-void LCD7735_dec(unsigned int numb, unsigned char dcount, unsigned char x, unsigned char y,unsigned int fntColor, unsigned int bkgColor);
-// процедура заполнени€ пр€моугольной области экрана заданным цветом
-
-
-// печать дес€тичного числа
-void LCD7735_dec(unsigned int numb, unsigned char dcount, unsigned char x, unsigned char y,unsigned int fntColor, unsigned int bkgColor) {
-	unsigned int divid=10000;
-	unsigned char i;
-
-	for (i=5; i!=0; i--) {
-
-		unsigned char res=numb/divid;
-
-		if (i<=dcount) {
-			lcd7735_putchar(x, y, res+'0', fntColor, bkgColor);
-			y=y+6;
-		}
-
-		numb%=divid;
-		divid/=10;
-	}
-}
-
-
-
-// вывод символа на экран по координатам
-void lcd7735_putchar(unsigned char x, unsigned char y, unsigned char chr, unsigned int charColor, unsigned int bkgColor) {
-	unsigned char i;
-	unsigned char j;
-#ifdef LCD_SEL_AUTO
-	LCD_CS0;
-#endif
-
-	lcd7735_at(x, y, x+12, y+8);
-	lcd7735_sendCmd(0x2C);
-
-#ifdef LCD_TO_SPI2
-	SPI2->CR1 |= SPI_CR1_DFF;   // если у нас SPI2 то передаем данные 16ти битовыми последовательност€ми
-	LCD_DC1;
-#endif
-  unsigned char k;
-	for (i=0;i<7;i++)
-		for (k=2;k>0;k--) {
-		   unsigned char chl=NewBFontLAT[ ( (chr-0x20)*14 + i+ 7*(k-1)) ];
-		   chl=chl<<2*(k-1); // нижнюю половину символа сдвигаем на 1 позицию влево (убираем одну линию снизу)
-		   unsigned char h;
-		   if (k==2) h=6; else h=7; // у нижней половины выведем только 6 точек вместо 7
-		   for (j=0;j<h;j++) {
-			unsigned int color;
-			if (chl & 0x80) color=charColor; else color=bkgColor;
-			chl = chl<<1;
-#ifndef LCD_TO_SPI2
-			lcd7735_sendData((unsigned char)((color & 0xFF00)>>8));
-			lcd7735_sendData((unsigned char) (color & 0x00FF));
-#else
-			while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET);
-			SPI_I2S_SendData(SPI2, color);
-#endif
-		}
-	}
-	// рисуем справо от символа пустую вертикальную линию дл€ бокового интервала
-	for (j=0;j<13;j++) {
-#ifndef LCD_TO_SPI2
-			lcd7735_sendData((unsigned char)((bkgColor & 0xFF00)>>8));
-			lcd7735_sendData((unsigned char) (bkgColor & 0x00FF));
-#else
-			while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET);
-			SPI_I2S_SendData(SPI2, bkgColor);
-#endif
-
-	}
-
-#ifdef LCD_TO_SPI2
-	while(SPI2->SR & SPI_SR_BSY);
-	SPI2->CR1 &=~ SPI_CR1_DFF;   // возращаемс€ в 8ми битный режим
-#endif
-#ifdef LCD_SEL_AUTO
-    LCD_CS1;
-#endif
-}
-
-
-
-// вывод строки
-void lcd7735_putstr(unsigned char x, unsigned char y, const unsigned char str[], unsigned int charColor, unsigned int bkgColor) {
-
-	while (*str!=0) {
-		lcd7735_putchar(x, y, *str, charColor, bkgColor);
-		y=y+8;
-		str++;
-	}
-}
-
-*/
