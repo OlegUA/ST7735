@@ -99,8 +99,8 @@ void lcd7735_init_screen(void *font,uint16_t fg, uint16_t bg,
 uint8_t orientation);<br>
 <b> Put single char of text line on terminal. The only ‘\n’ is
 emulated as CRLF.</b><br>
-extern void lcd7735_puts(char *str);<br>
-extern void lcd7735_putc(char c);<br>
+void lcd7735_puts(char *str);<br>
+void lcd7735_putc(char c);<br>
 <br>
 <i> Note. The standard printf functionality is redirected if will
 use Redirect.c</i><br>
