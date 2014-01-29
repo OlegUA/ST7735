@@ -105,3 +105,6 @@ extern void lcd7735_putc(char c);<br>
 <i> Note. The standard printf functionality is redirected if will
 use Redirect.c</i><br>
 <br>
+<br>
+<p>Please see hw_config.h for hardware settings</p>
+
