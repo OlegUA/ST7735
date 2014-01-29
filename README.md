@@ -108,5 +108,5 @@ use Redirect.c</i><br>
 <br>
 <p>Please see hw_config.h for hardware settings</p>
 
-<br><br>
-<a href="http://youtu.be/13At83AL1kw">Demo video</a>
+<br>
+<a href="http://youtu.be/13At83AL1kw"><h1>Demo video</h1></a>
