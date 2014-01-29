@@ -151,8 +151,34 @@ void SysTick_Handler(void)
 /*                 STM32F30x Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */
 /*  available peripheral interrupt handler's name please refer to the startup */
-/*  file (startup_stm32f30x.s).                                            */
+/*  file (startup_stm32f30x.s).                                               */
 /******************************************************************************/
+extern __IO uint32_t UserButtonPressed;
+__IO uint32_t i =0;
+/**
+  * @brief  This function handles EXTI0_IRQ Handler.
+  * @param  None
+  * @retval None
+  */
+void EXTI0_IRQHandler(void) { 
+  if ((EXTI_GetITStatus(USER_BUTTON_EXTI_LINE) == SET)&&(STM_EVAL_PBGetState(BUTTON_USER) != RESET))  {
+    /* Delay */
+    for(i=0; i<0x7FFFF; i++);
+    
+    /* Wait for SEL button to be pressed  */
+    while(STM_EVAL_PBGetState(BUTTON_USER) != RESET); 
+    /* Delay */
+    for(i=0; i<0x7FFFF; i++);
+    UserButtonPressed++;
+    
+    if (UserButtonPressed > 0x2)
+		UserButtonPressed = 0x1;
+    
+    /* Clear the EXTI line pending bit */
+    EXTI_ClearITPendingBit(USER_BUTTON_EXTI_LINE);
+  }
+}
+
 /**
   * @brief  This function handles PPP interrupt request.
   * @param  None

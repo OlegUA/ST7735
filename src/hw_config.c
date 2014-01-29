@@ -122,7 +122,7 @@ void lcd7735_setup(void) {
 
 #ifdef LCD_TO_SPI2  // hardware SIP
 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);  // тактирование SPI2
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);  
 			// сигналы SCK (Pin_13), MOSI (Pin_15) аппаратного SPI2
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_SPI2);   // SPI2_CLK
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource15, GPIO_AF_SPI2);   // SPI2_MOSI
@@ -134,7 +134,7 @@ void lcd7735_setup(void) {
 	GPIO_InitStructure.GPIO_PuPd  			= GPIO_PuPd_UP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	SPI_DeInit(SPI2); // сбрасываем настройки SPI2 перед заданием конфигурации
+	SPI_DeInit(SPI2); 
 	SPI_InitStructure.SPI_Mode        		= SPI_Mode_Master;
 	SPI_InitStructure.SPI_Direction   		= SPI_Direction_1Line_Rx;
 	SPI_InitStructure.SPI_DataSize 			= SPI_DataSize_8b;

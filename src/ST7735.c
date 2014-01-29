@@ -1,21 +1,23 @@
-/***************************************************
-  Code below has been ported from Arduino Adafruit library.
-  Copyrigths below.  
+/*********************************************************************************
+  Some parts of code have been ported from Arduino Adafruit & UTFT libraries.
+  Copyrights below:
 
-  This is a library for the Adafruit 1.8" SPI display.
-  This library works with the Adafruit 1.8" TFT Breakout w/SD card
-  ----> http://www.adafruit.com/products/358
-  as well as Adafruit raw 1.8" TFT display
-  ----> http://www.adafruit.com/products/618
- 
   Written by Limor Fried/Ladyada for Adafruit Industries.
   MIT license, all text above must be included in any redistribution
- ****************************************************/
+
+  UTFT.cpp - Arduino/chipKit library support for Color TFT LCD Boards
+  Copyright (C)2010-2013 Henning Karlsen. All right reserved
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the CC BY-NC-SA 3.0 license.
+  Please see the included documents for further information.
+**********************************************************************************/
 
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 #include "main.h"
-#include "Adafruit_ST7735.h"
+#include "ST7735.h"
 #include "hw_config.h"
 #include "platform_config.h"
 
@@ -167,7 +169,7 @@ static const uint8_t Rcmd3[] = {                 // Init for 7735R, part 3 (red 
 static int colstart = 0;
 static int rowstart = 0; // May be overridden in init func
 //static uint8_t tabcolor	= 0;
-static uint8_t orientation = PORTRAIT_NORMAL;
+static uint8_t orientation = PORTRAIT;
 	  
 // Companion code to the above tables.  Reads and issues
 // a series of LCD commands stored in PROGMEM byte array.
@@ -301,12 +303,12 @@ void lcd7735_drawFastLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint16
   signed char   dx, dy, sx, sy;
   unsigned char  x,  y, mdx, mdy, l;
 
-  if (x1==x2) { // быстрая отрисовка вертикальной линии
+  if (x1==x2) {
 	  lcd7735_fillRect(x1,y1, x1,y2, color);
 	  return;
   }
 
-  if (y1==y2) { // быстрая отрисовка горизонтальной линии
+  if (y1==y2) {
 	  lcd7735_fillRect(x1,y1, x2,y1, color);
 	  return;
   }
@@ -340,7 +342,6 @@ void lcd7735_drawFastLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint16
   lcd7735_drawPixel(x2, y2, color);
 }
 
-// рисование прямоугольника (не заполненного)
 void lcd7735_drawRect(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2, uint16_t color) {
 	lcd7735_drawFastHLine(x1,y1,x2-x1, color);
 	lcd7735_drawFastVLine(x2,y1,y2-y1, color);
@@ -434,12 +435,12 @@ void lcd7735_setRotation(uint8_t m) {
 
   lcd7735_sendCmd(ST7735_MADCTL);
   switch (rotation) {
-   case PORTRAIT_NORMAL:
+   case PORTRAIT:
      lcd7735_sendData(MADCTL_MX | MADCTL_MY | MADCTL_RGB);
      _width  = ST7735_TFTWIDTH;
      _height = ST7735_TFTHEIGHT;
      break;
-   case LANDSAPE_NORMAL:
+   case LANDSAPE:
      lcd7735_sendData(MADCTL_MY | MADCTL_MV | MADCTL_RGB);
      _width  = ST7735_TFTHEIGHT;
      _height = ST7735_TFTWIDTH;
@@ -460,21 +461,11 @@ void lcd7735_setRotation(uint8_t m) {
   orientation = m;
 }
 
-/*
-  This part of code dorectly ported from Arduino UTFT library. Copyrights below.
-
-  UTFT.cpp - Arduino/chipKit library support for Color TFT LCD Boards
-  Copyright (C)2010-2013 Henning Karlsen. All right reserved
-  
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the CC BY-NC-SA 3.0 license.
-  Please see the included documents for further information.
-*/
 void lcd7735_drawBitmap(int x, int y, int sx, int sy, bitmapdatatype data, int scale) {
 	int tx, ty, tc, tsx, tsy;
 
 	if (scale==1) {
-		if (orientation == PORTRAIT_NORMAL || orientation == PORTRAIT_FLIP)
+		if (orientation == PORTRAIT || orientation == PORTRAIT_FLIP)
 		{
 			lcd7735_setAddrWindow(x, y, x+sx-1, y+sy-1);
 			LCD_DC1;
@@ -489,7 +480,7 @@ void lcd7735_drawBitmap(int x, int y, int sx, int sy, bitmapdatatype data, int s
 			}
 		}
 	} else {
-		if (orientation == PORTRAIT_NORMAL || orientation == PORTRAIT_FLIP) {
+		if (orientation == PORTRAIT || orientation == PORTRAIT_FLIP) {
 			for (ty=0; ty<sy; ty++) {
 				lcd7735_setAddrWindow(x, y+(ty*scale), x+((sx*scale)-1), y+(ty*scale)+scale);
 				for (tsy=0; tsy<scale; tsy++)
@@ -532,22 +523,15 @@ void lcd7735_drawBitmapRotate(int x, int y, int sx, int sy, bitmapdatatype data,
 	}
 }
 
-static struct _font {
+typedef struct _font {
 	uint8_t 	*font;
 	uint8_t 	x_size;
 	uint8_t 	y_size;
 	uint8_t		offset;
 	uint16_t	numchars;
-} cfont;
+} Font;
 
-void lcd7735_setFont(uint8_t* font) {
-	cfont.font=font;
-	cfont.x_size=font[0];
-	cfont.y_size=font[1];
-	cfont.offset=font[2];
-	cfont.numchars=font[3];
-}
-
+static Font cfont;
 static uint8_t _transparent = 0;
 static uint16_t _fg = ST7735_GREEN;
 static uint16_t _bg = ST7735_BLACK;
@@ -559,8 +543,17 @@ void lcd7735_setTransparent(uint8_t s) {
 void lcd7735_setForeground(uint16_t s) {
 	_fg = s;
 }
+
 void lcd7735_setBackground(uint16_t s) {
 	_bg = s;
+}
+
+void lcd7735_setFont(uint8_t* font) {
+	cfont.font=font;
+	cfont.x_size=font[0];
+	cfont.y_size=font[1];
+	cfont.offset=font[2];
+	cfont.numchars=font[3];
 }
 
 void printChar(uint8_t c, int x, int y) {
@@ -663,95 +656,210 @@ void lcd7735_print(char *st, int x, int y, int deg) {
 			rotateChar(*st++, x, y, i, deg);
 }
 
+
+/***********************************************************************
+ *
+ *  ASCII green-screen terminal emulator
+ *
+ *  Written by Oleg Yakovlev
+ *  MIT license, all text above must be included in any redistribution
+ *
+ **********************************************************************/
+
+typedef struct _cursor {
+	uint16_t	row;
+	uint16_t	col;
+	uint8_t		*bitmap; // not used yet
+} Cursor;
+
+static struct __screen {
+	Cursor 		c;
+	uint8_t 	nrow;
+	uint8_t 	ncol;
+	Font 		fnt;
+	uint16_t 	fg;
+	uint16_t 	bg;
+	char		*scr;
+} _screen;
+
+static void _putch(uint8_t c);
+
+#define _scr(r,c) ((char *)(_screen.scr + ((r) * _screen.ncol) + (c)))
+
 /*
-void lcd7735_printNumI(long num, int x, int y, int length, char filler)
-{
-	char buf[25];
-	char st[27];
-	uint8_t neg=0;
-	int c=0, f=0,i;
-  
-	if (num==0) {
-		if (length!=0) {
-			for (c=0; c<(length-1); c++)
-				st[c]=filler;
-			st[c]=48;
-			st[c+1]=0;
-		} else {
-			st[0]=48;
-			st[1]=0;
-		}
-	} else {
-		if (num<0) {
-			neg=1;
-			num=-num;
-		}
-	  
-		while (num>0) {
-			buf[c]=48+(num % 10);
-			c++;
-			num=(num-(num % 10))/10;
-		}
-		buf[c]=0;
-	  
-		if (neg == 1) {
-			st[0]=45;
-		}
-	  
-		if (length>(c+neg)) {
-			for (i=0; i<(length-c-neg); i++) {
-				st[i+neg]=filler;
-				f++;
-			}
-		}
+static void aligned_memory_copy(void* dst, void* src, unsigned int bytes) {
+  uint8_t* b_dst = (uint8_t*)dst;
+  uint8_t* b_src = (uint8_t*)src;
+  uint16_t* w_dst = (uint16_t*)b_dst;
+  uint16_t* w_src = (uint16_t*)b_src;
 
-		for (i=0; i<c; i++) {
-			st[i+neg+f]=buf[c-i-1];
-		}
-		st[c+neg+f]=0;
-	}
+  // Copy bytes to align source pointer
+  while (((uint32_t)b_src & 0x3) != 0) {
+    *b_dst++ = *b_src++;
+    bytes--;
+  }
 
-	lcd7735_print(st,x,y,0);
-}
+  while (bytes >= 4) {
+    *w_dst++ = *w_src++;
+    bytes -= 4;
+  }
 
-void lcd7735_printNumF(double num, uint8_t dec, int x, int y, char divider, int length, char filler)
-{
-	char st[27], fmt[20];
-	uint8_t neg=0;
-	int i;
-
-	if (dec<1)
-		dec=1;
-	else if (dec>5)
-		dec=5;
-
-	if (num<0)
-		neg = 1;
-
-	sprintf(fmt,"%%%d.%df",length,(int)dec);
-	scanf(st, fmt, num);
-
-	if (divider != '.') {
-		for (i=0; i<sizeof(st); i++)
-			if (st[i]=='.')
-				st[i]=divider;
-	}
-
-	if (filler != ' ') {
-		if (neg) {
-			st[0]='-';
-			for (i=1; i<sizeof(st); i++)
-				if ((st[i]==' ') || (st[i]=='-'))
-					st[i]=filler;
-		} else {
-			for (i=0; i<sizeof(st); i++)
-				if (st[i]==' ')
-					st[i]=filler;
-		}
-	}
-	lcd7735_print(st,x,y,0);
+  // Copy trailing bytes
+  if (bytes > 0) {
+    b_dst = (uint8_t*)w_dst;
+    b_src = (uint8_t*)w_src;
+    while (bytes > 0) {
+      *b_dst++ = *b_src++;
+      bytes--;
+    }
+  }
 }
 */
+static void _scrollup() {
+	int r,c;
+//	aligned_memory_copy((void*)_screen.scr,(void*)(_screen.scr+_screen.ncol),_screen.ncol*(_screen.nrow-1));
+//	memset((void*)_scr(_screen.nrow-1,0),' ',_screen.ncol);
+	_screen.c.row = 0;
+	_screen.c.col = 0;
+	for(r=1;r<_screen.nrow;r++)
+		for(c=0;c<_screen.ncol;c++) {
+			_putch(*_scr(r,c));
+			_screen.c.col++;
+			if( _screen.c.col == _screen.ncol ) {			
+				_screen.c.col = 0;
+				_screen.c.row++;
+			}
+		}
+	for(c=0;c<_screen.ncol;c++) {
+		_putch(' ');
+		_screen.c.col++;
+	}
+	_screen.c.row = _screen.nrow - 1;
+	_screen.c.col = 0;
+}
+
+static void cursor_expose(int flg) {
+	uint8_t i,fz;
+	uint16_t j;
+	int x,y;
+
+	fz = cfont.x_size/8;
+	x = _screen.c.col * _screen.fnt.x_size;
+	y = _screen.c.row * _screen.fnt.y_size;
+	lcd7735_setAddrWindow(x,y,x+_screen.fnt.x_size-1,y+_screen.fnt.y_size-1);
+	for(j=0;j<((fz)*_screen.fnt.y_size);j++) {
+		for(i=0;i<8;i++) {
+			if( flg )
+				lcd7735_pushColor(_screen.fg);
+			else
+				lcd7735_pushColor(_screen.bg);
+		}
+	}
+}
+
+#define cursor_draw		cursor_expose(1)
+#define cursor_erase	cursor_expose(0)
+	
+
+static void cursor_nl() {
+	_screen.c.col = 0;
+	_screen.c.row++;
+	if( _screen.c.row == _screen.nrow ) {
+		_scrollup();
+	}
+}
+
+static void cursor_fwd() {
+	_screen.c.col++; 
+	if( _screen.c.col == _screen.ncol ) {
+		cursor_nl();
+	}
+}
+
+
+static void cursor_init() {
+	_screen.c.row = 0;
+	_screen.c.col = 0;
+}
+
+static void _putch(uint8_t c) {
+	uint8_t i,ch,fz;
+	uint16_t j;
+	uint16_t temp; 
+	int x,y;
+
+		fz = cfont.x_size/8;
+		x = _screen.c.col * _screen.fnt.x_size;
+		y = _screen.c.row * _screen.fnt.y_size;
+		lcd7735_setAddrWindow(x,y,x+_screen.fnt.x_size-1,y+_screen.fnt.y_size-1);
+		temp=((c-_screen.fnt.offset)*((fz)*_screen.fnt.y_size))+4;
+		for(j=0;j<((fz)*_screen.fnt.y_size);j++) {
+			ch = _screen.fnt.font[temp];
+			for(i=0;i<8;i++) {   
+				if((ch&(1<<(7-i)))!=0) {
+					lcd7735_pushColor(_screen.fg);
+				} else {
+					lcd7735_pushColor(_screen.bg);
+				}   
+			}
+			temp++;
+		}
+		*_scr(_screen.c.row, _screen.c.col) = c;
+}
+
+// public functions
+void lcd7735_init_screen(void *font,uint16_t fg, uint16_t bg, uint8_t orientation) {
+	lcd7735_setRotation(orientation);
+	lcd7735_fillScreen(bg);
+	lcd7735_setFont((uint8_t *)font);
+	_screen.fg = fg;
+	_screen.bg = bg;
+	_screen.fnt.font = (uint8_t *)font;
+	_screen.fnt.x_size = _screen.fnt.font[0];
+	_screen.fnt.y_size = _screen.fnt.font[1];
+	_screen.fnt.offset = _screen.fnt.font[2];
+	_screen.fnt.numchars = _screen.fnt.font[3];
+	_screen.nrow = _height / _screen.fnt.y_size;
+	_screen.ncol = _width  / _screen.fnt.x_size;
+	_screen.scr = malloc(_screen.nrow * _screen.ncol);
+	memset((void*)_screen.scr,' ',_screen.nrow * _screen.ncol);
+	cursor_init();
+	cursor_draw;
+}
+
+void lcd7735_putc(char c) {
+	if( c != '\n' && c != '\r' ) {
+		_putch(c);
+		cursor_fwd();
+	} else {
+		cursor_erase;
+		cursor_nl();
+	}
+	cursor_draw;
+}
+
+void lcd7735_puts(char *str) {
+	int i;
+	for(i=0;i<strlen(str);i++) {
+		if( str[i] != '\n' && str[i] != '\r' ) {
+			_putch(str[i]);
+			cursor_fwd();
+		} else {
+			cursor_erase;
+			cursor_nl();
+		}
+	}
+	cursor_draw;
+}
+
+void lcd7735_cursor_set(uint16_t row, uint16_t col) {
+	if( row < _screen.nrow && col < _screen.ncol ) {
+		_screen.c.row = row;
+		_screen.c.col = col;
+	}
+	cursor_draw;
+}
+
 /**  service functions ***/
 void lcd7735_invertDisplay(const uint8_t mode) {
 	if( mode == INVERT_ON ) lcd7735_sendCmd(ST7735_INVON);

@@ -1,6 +1,6 @@
 /***************************************************
-  Code below has been ported from Arduino Adafruit library.
-  Copyrigths below.  
+  Code has been ported from Arduino Adafruit library.
+  Copyrigths below:
 
   This is a library for the Adafruit 1.8" SPI display.
   This library works with the Adafruit 1.8" TFT Breakout w/SD card
@@ -93,8 +93,8 @@
 #define MADCTL_BGR 0x08
 #define MADCTL_MH  0x04
 
-#define PORTRAIT_NORMAL	0
-#define LANDSAPE_NORMAL	1
+#define PORTRAIT	0
+#define LANDSAPE	1
 #define PORTRAIT_FLIP	2
 #define LANDSAPE_FLIP	3
 
@@ -132,5 +132,9 @@ extern void lcd7735_setTransparent(uint8_t s);
 extern void lcd7735_setForeground(uint16_t s);
 extern void lcd7735_setBackground(uint16_t s);
 extern void lcd7735_print(char *st, int x, int y, int deg);
+
+extern void lcd7735_init_screen(void *font,uint16_t fg, uint16_t bg, uint8_t orientation);
+extern void lcd7735_puts(char *str);
+extern void lcd7735_putc(char c);
 
 #endif
