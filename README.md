@@ -108,3 +108,5 @@ use Redirect.c</i><br>
 <br>
 <p>Please see hw_config.h for hardware settings</p>
 
+<br><br>
+<iframe width="560" height="315" src="//www.youtube.com/embed/13At83AL1kw" frameborder="0" allowfullscreen></iframe>
