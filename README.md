@@ -102,7 +102,7 @@ emulated as CRLF.</b><br>
 void lcd7735_puts(char *str);<br>
 void lcd7735_putc(char c);<br>
 <br>
-<i><h3> Note. </h3></i>
+<i><h3>Notes</h3></i>
 <p>
 - The standard printf functionality is redirected if will use Redirect.c<br>
 - Two preprocessor defines are used to reducing code size in this mode:<br>
