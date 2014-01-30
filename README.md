@@ -3,7 +3,7 @@ ST7735
 
 <b>ST7735 driver and library for STM32F3DISCOVEY board</b><br>
 <p>The idea has been taken from Arduino Adafruit and UTFT sources. The arduino code has been ported for STM32F3 controller.</p>
-<p>Standard libraries like CIMSIS, Pheriperal, etc are not included</p>
+<p>Standard libraries like CMSIS, Pheriperal, etc are not included</p>
  <h2>Initialization</h2>
 <b>Initialization for ST7735B LCD (B&amp;W)</b><br>
 void lcd7735_initB(void);<br>
