@@ -170,6 +170,18 @@ static int colstart = 0;
 static int rowstart = 0; // May be overridden in init func
 //static uint8_t tabcolor	= 0;
 static uint8_t orientation = PORTRAIT;
+typedef struct _font {
+	uint8_t 	*font;
+	uint8_t 	x_size;
+	uint8_t 	y_size;
+	uint8_t		offset;
+	uint16_t	numchars;
+} Font;
+
+static Font cfont;
+static uint8_t _transparent = 0;
+static uint16_t _fg = ST7735_GREEN;
+static uint16_t _bg = ST7735_BLACK;
 	  
 // Companion code to the above tables.  Reads and issues
 // a series of LCD commands stored in PROGMEM byte array.
@@ -259,13 +271,12 @@ void lcd7735_setAddrWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
 
   lcd7735_sendCmd(ST7735_RAMWR); // write to RAM
 }
-
-
 void lcd7735_pushColor(uint16_t color) {
   LCD_DC1;  
-	putpix(color);
+  putpix(color);
 }
 
+// draw color pixel on screen
 void lcd7735_drawPixel(int16_t x, int16_t y, uint16_t color) {
 
   if((x < 0) ||(x >= _width) || (y < 0) || (y >= _height)) return;
@@ -273,6 +284,28 @@ void lcd7735_drawPixel(int16_t x, int16_t y, uint16_t color) {
   lcd7735_setAddrWindow(x,y,x+1,y+1);
   lcd7735_pushColor(color);
 }
+
+// fill a rectangle
+void lcd7735_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {	
+  // rudimentary clipping (drawChar w/big text requires this)
+  if((x >= _width) || (y >= _height)) return;
+  if((x + w - 1) >= _width)  w = _width  - x;
+  if((y + h - 1) >= _height) h = _height - y;
+
+  lcd7735_setAddrWindow(x, y, x+w-1, y+h-1);
+
+  LCD_DC1;
+  for(y=h; y>0; y--) {
+    for(x=w; x>0; x--) {
+		putpix(color);
+    }
+  }
+}
+
+//
+// for optimize code size if graphics features not need
+//
+#ifndef ONLY_TERMINAL_EMULATOR
 
 void lcd7735_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
   // Rudimentary clipping
@@ -285,7 +318,6 @@ void lcd7735_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
 		putpix(color);
 	}
 }
-
 
 void lcd7735_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
 	// Rudimentary clipping
@@ -349,32 +381,6 @@ void lcd7735_drawRect(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2, uint16_t colo
 	lcd7735_drawFastVLine(x1,y1,y2-y1, color);
 }
 
-// fill a rectangle
-void lcd7735_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {	
-  // rudimentary clipping (drawChar w/big text requires this)
-  if((x >= _width) || (y >= _height)) return;
-  if((x + w - 1) >= _width)  w = _width  - x;
-  if((y + h - 1) >= _height) h = _height - y;
-
-  lcd7735_setAddrWindow(x, y, x+w-1, y+h-1);
-
-  LCD_DC1;
-  for(y=h; y>0; y--) {
-    for(x=w; x>0; x--) {
-		putpix(color);
-    }
-  }
-}
-
-void lcd7735_fillScreen(uint16_t color) {
-  lcd7735_fillRect(0, 0,  _width, _height, color);
-}
-
-// Pass 8-bit (each) R,G,B, get back 16-bit packed color
-uint16_t lcd7735_Color565(uint8_t r, uint8_t g, uint8_t b) {
-  return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
-}
-
 void lcd7735_drawCircle(int16_t x, int16_t y, int radius, uint16_t color) {
 	int f = 1 - radius;
 	int ddF_x = 1;
@@ -428,37 +434,6 @@ void lcd7735_fillCircle(int16_t x, int16_t y, int radius, uint16_t color) {
 				lcd7735_drawFastHLine(x+x1, y-y1, 2*(-x1), color);
 				break;
 			}
-}
-
-void lcd7735_setRotation(uint8_t m) {
-  uint8_t rotation = m % 4; // can't be higher than 3
-
-  lcd7735_sendCmd(ST7735_MADCTL);
-  switch (rotation) {
-   case PORTRAIT:
-     lcd7735_sendData(MADCTL_MX | MADCTL_MY | MADCTL_RGB);
-     _width  = ST7735_TFTWIDTH;
-     _height = ST7735_TFTHEIGHT;
-     break;
-   case LANDSAPE:
-     lcd7735_sendData(MADCTL_MY | MADCTL_MV | MADCTL_RGB);
-     _width  = ST7735_TFTHEIGHT;
-     _height = ST7735_TFTWIDTH;
-     break;
-  case PORTRAIT_FLIP:
-     lcd7735_sendData(MADCTL_RGB);
-     _width  = ST7735_TFTWIDTH;
-     _height = ST7735_TFTHEIGHT;
-    break;
-   case LANDSAPE_FLIP:
-     lcd7735_sendData(MADCTL_MX | MADCTL_MV | MADCTL_RGB);
-     _width  = ST7735_TFTHEIGHT;
-     _height = ST7735_TFTWIDTH;
-     break;
-   default:
-	   return;
-  }
-  orientation = m;
 }
 
 void lcd7735_drawBitmap(int x, int y, int sx, int sy, bitmapdatatype data, int scale) {
@@ -521,31 +496,6 @@ void lcd7735_drawBitmapRotate(int x, int y, int sx, int sy, bitmapdatatype data,
 				lcd7735_pushColor(data[(ty*sx)+tx]);
 			}
 	}
-}
-
-typedef struct _font {
-	uint8_t 	*font;
-	uint8_t 	x_size;
-	uint8_t 	y_size;
-	uint8_t		offset;
-	uint16_t	numchars;
-} Font;
-
-static Font cfont;
-static uint8_t _transparent = 0;
-static uint16_t _fg = ST7735_GREEN;
-static uint16_t _bg = ST7735_BLACK;
-
-void lcd7735_setTransparent(uint8_t s) {
-	_transparent = s;
-}
-
-void lcd7735_setForeground(uint16_t s) {
-	_fg = s;
-}
-
-void lcd7735_setBackground(uint16_t s) {
-	_bg = s;
 }
 
 void lcd7735_setFont(uint8_t* font) {
@@ -656,6 +606,8 @@ void lcd7735_print(char *st, int x, int y, int deg) {
 			rotateChar(*st++, x, y, i, deg);
 }
 
+#endif /* ONLY_TERMINAL_EMULATOR */
+
 
 /***********************************************************************
  *
@@ -743,7 +695,7 @@ static void cursor_expose(int flg) {
 	uint16_t j;
 	int x,y;
 
-	fz = cfont.x_size/8;
+	fz = _screen.fnt.x_size/8;
 	x = _screen.c.col * _screen.fnt.x_size;
 	y = _screen.c.row * _screen.fnt.y_size;
 	lcd7735_setAddrWindow(x,y,x+_screen.fnt.x_size-1,y+_screen.fnt.y_size-1);
@@ -788,7 +740,7 @@ static void _putch(uint8_t c) {
 	uint16_t temp; 
 	int x,y;
 
-		fz = cfont.x_size/8;
+		fz = _screen.fnt.x_size/8;
 		x = _screen.c.col * _screen.fnt.x_size;
 		y = _screen.c.row * _screen.fnt.y_size;
 		lcd7735_setAddrWindow(x,y,x+_screen.fnt.x_size-1,y+_screen.fnt.y_size-1);
@@ -811,7 +763,6 @@ static void _putch(uint8_t c) {
 void lcd7735_init_screen(void *font,uint16_t fg, uint16_t bg, uint8_t orientation) {
 	lcd7735_setRotation(orientation);
 	lcd7735_fillScreen(bg);
-	lcd7735_setFont((uint8_t *)font);
 	_screen.fg = fg;
 	_screen.bg = bg;
 	_screen.fnt.font = (uint8_t *)font;
@@ -860,7 +811,52 @@ void lcd7735_cursor_set(uint16_t row, uint16_t col) {
 	cursor_draw;
 }
 
-/**  service functions ***/
+/*********************************************************************
+ *********************************************************************
+ *********************** Service functions ***************************
+ *********************************************************************
+ *********************************************************************/
+
+void lcd7735_fillScreen(uint16_t color) {
+  lcd7735_fillRect(0, 0,  _width, _height, color);
+}
+
+// Pass 8-bit (each) R,G,B, get back 16-bit packed color
+uint16_t lcd7735_Color565(uint8_t r, uint8_t g, uint8_t b) {
+  return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
+}
+
+void lcd7735_setRotation(uint8_t m) {
+  uint8_t rotation = m % 4; // can't be higher than 3
+
+  lcd7735_sendCmd(ST7735_MADCTL);
+  switch (rotation) {
+   case PORTRAIT:
+     lcd7735_sendData(MADCTL_MX | MADCTL_MY | MADCTL_RGB);
+     _width  = ST7735_TFTWIDTH;
+     _height = ST7735_TFTHEIGHT;
+     break;
+   case LANDSAPE:
+     lcd7735_sendData(MADCTL_MY | MADCTL_MV | MADCTL_RGB);
+     _width  = ST7735_TFTHEIGHT;
+     _height = ST7735_TFTWIDTH;
+     break;
+  case PORTRAIT_FLIP:
+     lcd7735_sendData(MADCTL_RGB);
+     _width  = ST7735_TFTWIDTH;
+     _height = ST7735_TFTHEIGHT;
+    break;
+   case LANDSAPE_FLIP:
+     lcd7735_sendData(MADCTL_MX | MADCTL_MV | MADCTL_RGB);
+     _width  = ST7735_TFTHEIGHT;
+     _height = ST7735_TFTWIDTH;
+     break;
+   default:
+	   return;
+  }
+  orientation = m;
+}
+
 void lcd7735_invertDisplay(const uint8_t mode) {
 	if( mode == INVERT_ON ) lcd7735_sendCmd(ST7735_INVON);
 	else if( mode == INVERT_OFF ) lcd7735_sendCmd(ST7735_INVOFF);

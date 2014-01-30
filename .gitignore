@@ -1,6 +1,10 @@
+doxy/
+Documentation/
 ################
 ## MDK-ARM
 ################
+MDK/
+MDK-ARM/
 .save/
 .orig/
 .archive/

@@ -7,15 +7,17 @@
  ****************************************************************************************/
 #include <stdio.h>
 #include "stm32f30x.h"
+#include "stm32f3_discovery.h"
+#include "platform_config.h"
 #include "stm32f30x_gpio.h"
 #include "stm32f30x_rcc.h"
 #include "stm32f30x_spi.h"
 
-#include "main.h"        
 #include "hw_config.h"
 
 static __IO uint32_t TimingDelay;
 
+#ifndef __ENABLE_NOT_STABLE
 // not work :( It is possible that GPIO pin doesn't switch to input mode, but I don't know hot to do it.
 void receive_data(const uint8_t cmd, uint8_t *data, uint8_t cnt) {
 	uint8_t i;
@@ -46,6 +48,8 @@ void receive_data(const uint8_t cmd, uint8_t *data, uint8_t cnt) {
 	LCD_CS1;
 	LCD_CS0;
 }
+
+#endif
 
 // Send byte via SPI to controller
 void lcd7735_senddata(const uint8_t data) {
@@ -101,7 +105,7 @@ void lcd7735_setup(void) {
 #endif
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-    SystemInit();
+//    SystemInit();
 
 	STM_EVAL_LEDInit(LED3);
 	STM_EVAL_LEDInit(LED4);
@@ -123,7 +127,7 @@ void lcd7735_setup(void) {
 #ifdef LCD_TO_SPI2  // hardware SIP
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);  
-			// сигналы SCK (Pin_13), MOSI (Pin_15) аппаратного SPI2
+			// SCK (Pin_13), MOSI (Pin_15) SPI2
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_SPI2);   // SPI2_CLK
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource15, GPIO_AF_SPI2);   // SPI2_MOSI
 
@@ -180,4 +184,10 @@ void delay_ms(uint32_t delay_value) {
 
 void TimingDelay_Decrement(void) {
   if (TimingDelay != 0x00) TimingDelay--;
+}
+
+// override handler
+void SysTick_Handler(void)
+{
+	TimingDelay_Decrement();
 }

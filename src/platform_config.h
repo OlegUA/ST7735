@@ -38,7 +38,7 @@
 /* Uncomment the line corresponding to the STMicroelectronics evaluation board
    used to run the example */
 #if !defined (USE_STM32303C_EVAL)
-#define (USE_STM32303C_EVAL)
+#define USE_STM32303C_EVAL
 #endif
 
 /*Unique Devices IDs register set*/
