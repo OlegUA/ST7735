@@ -2,7 +2,7 @@ ST7735
 ======
 
 <b>ST7735 driver and library for STM32F3DISCOVEY board</b><br>
-<p>Ported from Arduino Adafruit and UTFT sources to STM32F3 controller.</p>
+<p>The idea has been taken from Arduino Adafruit and UTFT sources. The arduino code has been ported for STM32F3 controller.</p>
 <p>Standard libraries like CIMSIS, Pheriperal, etc are not included</p>
  <h2>Initialization</h2>
 <b>Initialization for ST7735B LCD (B&amp;W)</b><br>
@@ -102,11 +102,16 @@ emulated as CRLF.</b><br>
 void lcd7735_puts(char *str);<br>
 void lcd7735_putc(char c);<br>
 <br>
-<i> Note. The standard printf functionality is redirected if will
-use Redirect.c</i><br>
+<i><h3> Note. </h3></i>
+<p>
+- The standard printf functionality is redirected if will use Redirect.c<br>
+- Two preprocessor defines are used to reducing code size in this mode:<br>
+<b>ONLY_TERMINAL_EMULATOR</b> - excludes all graphics functions<br>
+<b>ONLY_SMALL_FONT</b> - excludes Big and SevenSeg fonts<br>
 <br>
-<br>
-<p>Please see hw_config.h for hardware settings</p>
+</p>
+<p>Please see hw_config.h for hardware settings.
+You have to carefuly setup INVEC table due to ST7735 is used SysTick for programing delays.</p>
 
 <br>
 <a href="http://youtu.be/13At83AL1kw"><b><u>Demo video</u></b></a>
