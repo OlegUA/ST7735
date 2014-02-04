@@ -44,7 +44,7 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>.\ST7735\</OutputDirectory>
+          <OutputDirectory>.\build\</OutputDirectory>
           <OutputName>ST7735</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
@@ -494,11 +494,6 @@
               <FilePath>..\..\STM32F3_Libraries\Libraries\CMSIS\Device\ST\STM32F30x\Source\Templates\system_stm32f30x.c</FilePath>
             </File>
             <File>
-              <FileName>Adafruit_ST7735.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\Adafruit_ST7735.c</FilePath>
-            </File>
-            <File>
               <FileName>DefaultFonts.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\DefaultFonts.c</FilePath>
@@ -512,6 +507,16 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>ST7735.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\ST7735.c</FilePath>
+            </File>
+            <File>
+              <FileName>Retarget.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\Retarget.c</FilePath>
             </File>
           </Files>
         </Group>

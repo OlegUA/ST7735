@@ -16,8 +16,8 @@ int main(void) {
 
 	STM_EVAL_LEDInit(LED3);
 	STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_EXTI); 
-    STM_EVAL_LEDOff(LED3);
-	
+	STM_EVAL_LEDOff(LED3);
+
 	lcd7735_setup();
 	delay_ms(50);
 	lcd7735_initR(INITR_REDTAB);
@@ -56,10 +56,10 @@ void test_graphics(void) {
 	unsigned char y;
 	unsigned char x;
 	uint8_t r = 0;
-//	uint8_t m[16];
-	
-//	receive_data(0x0B,m,2);
-//	delay_ms(2000);
+	//	uint8_t m[16];
+
+	//	receive_data(0x0B,m,2);
+	//	delay_ms(2000);
 	lcd7735_fillScreen(ST7735_BLACK);
 	lcd7735_setFont((uint8_t *)&BigFont[0]);
 	while(1) {
@@ -67,9 +67,9 @@ void test_graphics(void) {
 		delay_ms(1000);
 		lcd7735_print("Hello!",10,10,30);
 		delay_ms(1000);
-        lcd7735_drawBitmap(0,0,50,52,(bitmapdatatype)tux_50_ad,1);
+		lcd7735_drawBitmap(0,0,50,52,(bitmapdatatype)tux_50_ad,1);
 		delay_ms(1000);
-        lcd7735_drawBitmap(0,0,50,52,(bitmapdatatype)tux_50_ad,2);
+		lcd7735_drawBitmap(0,0,50,52,(bitmapdatatype)tux_50_ad,2);
 		delay_ms(1000);
 		for (y=0;y<160;y++) {
 			for (x=0;x<128;x++) {

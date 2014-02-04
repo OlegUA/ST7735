@@ -1,5 +1,5 @@
-#ifndef __HW_CONFIG__
-#define __HW_CONFIG__
+#ifndef __VCP_HW_CONFIG__
+#define __VCP_HW_CONFIG__
 
 #include "stm32f30x.h"
 //
@@ -15,14 +15,14 @@
 #define 	LCD_GPIO			GPIOB
 
 #define     LCD_AHB1_GPIO		RCC_AHBPeriph_GPIOB
-
-#define 	LCD_RST_PIN 		GPIO_Pin_14
-#define     LCD_A0_PIN			GPIO_Pin_12
-#define		LCD_CSE_PIN			GPIO_Pin_10
+//                                                         Pin name fo IDBD02-1.8SP
+#define 	LCD_RST_PIN 		GPIO_Pin_14	// PB14 (RST)
+#define     LCD_A0_PIN			GPIO_Pin_12	// PB12 (RS)
+#define		LCD_CSE_PIN			GPIO_Pin_10	// PB10 (CS)
 
 // For software SPI only
-#define		LCD_SDA_PIN			GPIO_Pin_15
-#define		LCD_SCK_PIN			GPIO_Pin_13
+#define		LCD_SDA_PIN			GPIO_Pin_15	// PB15 (SCL)
+#define		LCD_SCK_PIN			GPIO_Pin_13	// PB13 (SDA)
 
 // operate GPIO bits via GPIO function call for debug purposes
 //#define NO_BITBIND
@@ -71,8 +71,5 @@ extern void lcd7735_sendData(const uint8_t data);
 
 extern void receive_data(const uint8_t cmd, uint8_t *data, uint8_t cnt);
 
-extern void TimingDelay_Decrement(void);
-extern void delay_ms(uint32_t delay_value);
-
-#endif /* __HW_CONFIG__ */
+#endif /* __VCP_HW_CONFIG__ */
 

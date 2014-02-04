@@ -103,6 +103,10 @@
 
 #define bitmapdatatype uint16_t *
 
+// HW config
+extern void lcd7735_setup(void);
+extern void delay_ms(uint32_t delay_value);
+
 // Initialization for ST7735B screens
 extern void lcd7735_initB(void);
 // Initialization for ST7735R screens (green or red tabs)

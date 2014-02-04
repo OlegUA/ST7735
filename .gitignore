@@ -1,5 +1,6 @@
 doxy/
 Documentation/
+*.orig
 ################
 ## MDK-ARM
 ################
