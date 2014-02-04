@@ -3,6 +3,7 @@ ST7735
 
 <b>ST7735 driver and library for STM32F3DISCOVEY board</b><br>
 <p>The idea has been taken from Arduino Adafruit and UTFT sources. The arduino code has been ported for STM32F3 controller.</p>
+<a href="http://youtu.be/13At83AL1kw"><b><u>Demo video</u></b></a>
 
  <h2>Initialization</h2>
 <b>Initialization for ST7735B LCD (B&amp;W)</b><br>
@@ -98,4 +99,4 @@ void lcd7735_putc(char c);<br>
 You have to carefuly setup INVEC table due to ST7735 is used SysTick for programing delays.</p>
 <p>Standard libraries like CMSIS, Peripheral, etc are not included</p>
 <br>
-<a href="http://youtu.be/13At83AL1kw"><b><u>Demo video</u></b></a>
+
